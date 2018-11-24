@@ -3,8 +3,10 @@ import React, { Component } from 'react';
 import crypto from 'crypto';
 import crc32 from 'crc/crc32';
 import Dropzone from 'react-dropzone';
-import { Button, ProgressBar, ButtonToolbar } from 'react-bootstrap';
+import { Button, DropdownButton, ProgressBar, ButtonToolbar, Modal, MenuItem} from 'react-bootstrap';
 import { Line, Circle } from 'rc-progress';
+
+import './App.css';
 
 
 class Main extends Component {
@@ -14,11 +16,21 @@ class Main extends Component {
                       uploadStatus: 0,
                       hashValue:null,
                       crc32Value: null,
-                      fileOwner: null};
+                      fileOwner: null,
+                      show: false,
+                      loggedIn: false,
+                      userName: null};
+
         this.setStateValue = this.setStateValue.bind(this);
+        this.handleHide = this.handleHide.bind(this);
+        this.handleAccept = this.handleAccept.bind(this);
+        this.handleMenuChange = this.handleMenuChange.bind(this);
+
+
 
 
     }
+
     componentWillMount() {
 
 
@@ -29,12 +41,28 @@ class Main extends Component {
 
     }
 
-    async componentDidMount(){
-        // await this.initWeb3Connection();
-        ApiService.getBalance();
-
-
+    handleHide() {
+        this.setState({ show: false });
     }
+
+    handleAccept() {
+
+        ApiService.getAssetOwnership(this.state.crc32Value, 'alice', 'bob', '10 FIL', this.setStateValue);
+        this.setState({ show: false });
+     }
+
+    handleMenuChange(eventKey, event) {
+
+        this.setState({ userName: eventKey});
+    }
+
+
+    // async componentDidMount() {
+    //     // await this.initWeb3Connection();
+    //     ApiService.getBalance();
+    //
+    //
+    // }
 
     async initWeb3Connection() {
         // const web3 = window.web3;
@@ -92,6 +120,8 @@ class Main extends Component {
 
     render() {
         return (
+
+            this.state.loggedIn ?
             <div style={{display: "flex", alignItems: "center",
                 justifyContent: "center", flexDirection: "column",
                 "padding": 100}}>
@@ -119,7 +149,7 @@ class Main extends Component {
                 <ButtonToolbar  style={{margin: "5%"}}>
                 <Button bsStyle="primary" bsSize="large" active
                         disabled={!this.state.hashValue}
-                        onClick={(e) => ApiService.registerAsset(this.state.crc32Value, "alice")}>
+                        onClick={(e) => ApiService.registerAsset(this.state.crc32Value, this.state.userName)}>
                     Register file
                 </Button>
                     <Button bsStyle="primary" bsSize="large" active
@@ -127,13 +157,68 @@ class Main extends Component {
                             onClick={(e) => ApiService.queryAsset(this.state.crc32Value, this.setStateValue)}>
                         Check owner
                     </Button>
+
+                    <Button bsStyle="primary" bsSize="large" active
+                            disabled={!this.state.hashValue}
+                            onClick={() => this.setState({ show: true })}>
+
+                        Ask ownership
+                    </Button>
                 </ButtonToolbar>
 
 
+                <Modal
+                    show={this.state.show}
+                    onHide={this.handleHide}
+                    container={this}
+                    aria-labelledby="contained-modal-title"
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title id="contained-modal-title">
+                            Pay token
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        Pay <b>10 FILE </b> tokens get the ownesrship of the file with hash value: <code>{this.state.hashValue}</code>
+                    </Modal.Body>
+
+                    <Modal.Footer style={{display: "flex", alignItems: "center",
+                        justifyContent: "center"}}>
+                        <Button onClick={this.handleAccept}>Acccept</Button>
+                    </Modal.Footer>
+
+                </Modal>
+
+            </div>
+
+            :
+            <div style={{display: "flex", alignItems: "center",
+                justifyContent: "center", flexDirection: "column",
+                padding: 100, backgroundColor: "#01315a"}}>
+                <span style={{color:"white", fontSize: 30}}>Login to the POO App </span>
+                <div>
 
 
+                <DropdownButton
+                    style={{width: 100}}
+                    bsStyle={'large'}
+                    title={this.state.userName ? this.state.userName : 'Select User'}
 
+                >
+                    <MenuItem eventKey="alice" onSelect={this.handleMenuChange}>alice</MenuItem>
+                    <MenuItem eventKey="bob" onSelect={this.handleMenuChange}>bob</MenuItem>
+                    <MenuItem eventKey="carol"onSelect={this.handleMenuChange}>carol </MenuItem>
 
+                </DropdownButton>
+            <ButtonToolbar style={{margin: "5%"}}>
+                <Button bsStyle="primary" bsSize="large" active
+
+                        onClick={() => this.setState({ loggedIn: true })}>
+
+                    Login
+                </Button>
+            </ButtonToolbar>
+                    </div>
             </div>
     );
     }

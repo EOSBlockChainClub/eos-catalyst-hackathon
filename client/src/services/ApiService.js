@@ -70,7 +70,7 @@ class ApiService {
                       name: "addrecord",
                       authorization: [
                           {
-                              actor: "alice",
+                              actor: user,
                               permission: "active"
                           }
                       ],
@@ -85,6 +85,40 @@ class ApiService {
           });
 
   }
+
+    static getAssetOwnership(file_id, from, to, quantity, callback) {
+
+        const eos = ApiService.getEosInstance();
+
+        try {
+
+            eos.transaction({
+                actions: [
+                    {
+                        account: "poo",
+                        name: "transrecord",
+                        authorization: [
+                            {
+                                actor: "alice",
+                                permission: "active"
+                            }
+                        ],
+                        data: {"file_id": file_id, "from": from, "to": to, "quantity": quantity}
+                    }
+                ]
+            })
+                .then(result => {
+                    // Check token balances again.  You'll now see 5 TOK in user2’s
+                    // account and 95 TOK in user1’s account
+                    console.log(result);
+                });
+
+        }
+
+        catch (err) {
+            console.log(err);
+        }
+    }
 
     static queryAsset(file_id, callback) {
 
@@ -115,9 +149,6 @@ class ApiService {
         catch (err) {
             console.log(err);
         }
-
-
-
     }
 
 }
