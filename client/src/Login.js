@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import crypto from 'crypto';
 import crc32 from 'crc/crc32';
 import Dropzone from 'react-dropzone';
-import { Button, DropdownButton, ProgressBar, ButtonToolbar, Modal, MenuItem} from 'react-bootstrap';
+import { Button, ProgressBar, ButtonToolbar, Modal} from 'react-bootstrap';
 import { Line, Circle } from 'rc-progress';
 
 import './App.css';
@@ -17,16 +17,10 @@ class Main extends Component {
                       hashValue:null,
                       crc32Value: null,
                       fileOwner: null,
-                      show: false,
-                      loggedIn: false,
-                      userName: null};
-
+                      show: false};
         this.setStateValue = this.setStateValue.bind(this);
         this.handleHide = this.handleHide.bind(this);
         this.handleAccept = this.handleAccept.bind(this);
-        this.handleMenuChange = this.handleMenuChange.bind(this);
-
-
 
 
     }
@@ -47,14 +41,9 @@ class Main extends Component {
 
     handleAccept() {
 
-        ApiService.getAssetOwnership(this.state.crc32Value, this.state.userName, this.state.fileOwner, '10 FIL', this.setStateValue);
+        ApiService.getAssetOwnership(this.state.crc32Value, 'alice', 'bob', '10 FIL', this.setStateValue);
         this.setState({ show: false });
      }
-
-    handleMenuChange(eventKey, event) {
-
-        this.setState({ userName: eventKey});
-    }
 
 
     // async componentDidMount() {
@@ -120,8 +109,6 @@ class Main extends Component {
 
     render() {
         return (
-
-            this.state.loggedIn ?
             <div style={{display: "flex", alignItems: "center",
                 justifyContent: "center", flexDirection: "column",
                 "padding": 100}}>
@@ -141,15 +128,15 @@ class Main extends Component {
                 {this.state.hashValue ? <div> <b>File hash value</b>: <code>{this.state.hashValue}</code></div> : null
 
                 }
-                {this.state.fileOwner !== null ? <div> <b>Current owner</b>: <code>{this.state.fileOwner === false ? 'Not registered' : this.state.fileOwner}</code></div> : null
+                {this.state.fileOwner ? <div> <b>Current owner</b>: <code>{this.state.fileOwner}</code></div> : null
 
                 }
 
 
                 <ButtonToolbar  style={{margin: "5%"}}>
                 <Button bsStyle="primary" bsSize="large" active
-                        disabled={!this.state.hashValue || this.state.fileOwner}
-                        onClick={(e) => ApiService.registerAsset(this.state.crc32Value, this.state.userName)}>
+                        disabled={!this.state.hashValue}
+                        onClick={(e) => ApiService.registerAsset(this.state.crc32Value, "alice")}>
                     Register file
                 </Button>
                     <Button bsStyle="primary" bsSize="large" active
@@ -189,36 +176,11 @@ class Main extends Component {
 
                 </Modal>
 
-            </div>
-
-            :
-            <div style={{display: "flex", alignItems: "center",
-                justifyContent: "center", flexDirection: "column",
-                padding: 100, backgroundColor: "#01315a"}}>
-                <span style={{color:"white", fontSize: 30}}>Login to the POO App </span>
-                <div>
 
 
-                <DropdownButton
-                    style={{width: 100}}
-                    bsStyle={'large'}
-                    title={this.state.userName ? this.state.userName : 'Select User'}
 
-                >
-                    <MenuItem eventKey="alice" onSelect={this.handleMenuChange}>alice</MenuItem>
-                    <MenuItem eventKey="bob" onSelect={this.handleMenuChange}>bob</MenuItem>
-                    <MenuItem eventKey="carol"onSelect={this.handleMenuChange}>carol </MenuItem>
 
-                </DropdownButton>
-            <ButtonToolbar style={{margin: "5%"}}>
-                <Button bsStyle="primary" bsSize="large" active
 
-                        onClick={() => this.setState({ loggedIn: true })}>
-
-                    Login
-                </Button>
-            </ButtonToolbar>
-                    </div>
             </div>
     );
     }

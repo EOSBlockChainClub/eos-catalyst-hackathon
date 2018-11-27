@@ -99,7 +99,7 @@ class ApiService {
                         name: "transrecord",
                         authorization: [
                             {
-                                actor: "alice",
+                                actor: from,
                                 permission: "active"
                             }
                         ],
@@ -139,7 +139,7 @@ class ApiService {
                 }
                 catch (err) {
                     console.log(err);
-                    callback('fileOwner', 'Not found!');
+                    callback('fileOwner', false);
 
                 }
             });
